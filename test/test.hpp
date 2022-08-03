@@ -129,7 +129,14 @@ void test_constexpr()
 
 void test_concepts()
 {
-    CHECK(std::is_trivial_v<ltpl::Tuple<>>);
+    using EmptyTuple = ltpl::Tuple<>;
+    CHECK(std::is_trivially_default_constructible_v<EmptyTuple>);
+    CHECK(std::is_trivially_copy_constructible_v<EmptyTuple>);
+    CHECK(std::is_trivially_move_constructible_v<EmptyTuple>);
+    CHECK(std::is_trivially_copy_assignable_v<EmptyTuple>);
+    CHECK(std::is_trivially_move_assignable_v<EmptyTuple>);
+    CHECK(std::is_trivially_destructible_v<EmptyTuple>);
+
     using Tuple = ltpl::Tuple<int, double>;
     CHECK(std::is_nothrow_constructible_v<Tuple, int, double>);
     CHECK(std::is_trivially_copy_constructible_v<Tuple>);
