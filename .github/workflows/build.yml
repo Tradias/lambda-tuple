@@ -98,6 +98,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         sonar-scanner \
+          -Dsonar.cfamily.compile-commands=${{ github.workspace }}/build/compile_commands.json \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.coverageReportPaths=${{ github.workspace }}/build/sonarqube-coverage.xml
 

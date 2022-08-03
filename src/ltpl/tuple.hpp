@@ -350,9 +350,9 @@ template <std::size_t I, class... T>
 }
 
 template <class... T>
-constexpr Tuple<std::unwrap_ref_decay_t<T>...> make_tuple(T&&... v)
+constexpr Tuple<typename std::unwrap_ref_decay<T>::type...> make_tuple(T&&... v)
 {
-    return Tuple<std::unwrap_ref_decay_t<T>...>(std::forward<T>(v)...);
+    return Tuple<typename std::unwrap_ref_decay<T>::type...>(std::forward<T>(v)...);
 }
 
 template <class... T>
