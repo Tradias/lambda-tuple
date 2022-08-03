@@ -6,6 +6,7 @@
 #ifndef LTPL_TEST_UTILITY_HPP
 #define LTPL_TEST_UTILITY_HPP
 
+#include <type_traits>
 #include <utility>
 
 namespace test
@@ -88,6 +89,26 @@ struct Immovable
     Immovable& operator=(Immovable&&) = delete;
 
     friend bool operator==(const Immovable&, const Immovable&) = default;
+};
+
+template <class T, class U>
+concept ConvertibleTo = std::is_convertible_v<T, U>;
+
+template <class T, class U>
+concept EqualityComparableWith = requires(const std::remove_reference_t<T>& t, const std::remove_reference_t<U>& u)
+{
+    {
+        t == u
+        } -> ConvertibleTo<bool>;
+    {
+        t != u
+        } -> ConvertibleTo<bool>;
+    {
+        u == t
+        } -> ConvertibleTo<bool>;
+    {
+        u != t
+        } -> ConvertibleTo<bool>;
 };
 }  // namespace test
 

@@ -29,8 +29,7 @@ int main()
     run_test<&test_equality_compare_value_const_lref<StdTuple>>();
     run_test<&test_equality_compare_value_rref<LambdaTuple>>();
     run_test<&test_equality_compare_value_rref<StdTuple>>();
-    run_test<&test_not_equality_comparable<LambdaTuple>>();
-    run_test<&test_not_equality_comparable<StdTuple>>();
+    run_test<test_not_equality_comparable>();
 
     // test_constructor
     run_test<&test_empty_tuple_default_constructor<LambdaTuple>>();

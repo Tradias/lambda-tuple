@@ -74,11 +74,7 @@ void test_equality_compare_value_rref()
     CHECK_EQ(tuple3, tuple);
 }
 
-template <class T>
-void test_not_equality_comparable()
-{
-    CHECK_FALSE(std::equality_comparable_with<TupleT<T, int>, TupleT<T, const char*>>);
-}
+void test_not_equality_comparable() { CHECK_FALSE(EqualityComparableWith<ltpl::Tuple<int>, ltpl::Tuple<const char*>>); }
 }  // namespace test
 
 #endif  // LTPL_TEST_TEST_COMPARISON_HPP

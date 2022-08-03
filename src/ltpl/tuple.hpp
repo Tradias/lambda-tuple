@@ -35,6 +35,26 @@ struct Access
     }
 };
 
+template <class T, class U>
+concept ConvertibleTo = std::is_convertible_v<T, U>;
+
+template <class T, class U>
+concept EqualityComparableWith = requires(const std::remove_reference_t<T>& t, const std::remove_reference_t<U>& u)
+{
+    {
+        t == u
+        } -> ConvertibleTo<bool>;
+    {
+        t != u
+        } -> ConvertibleTo<bool>;
+    {
+        u == t
+        } -> ConvertibleTo<bool>;
+    {
+        u != t
+        } -> ConvertibleTo<bool>;
+};
+
 template <class, class, class...>
 inline constexpr bool is_not_exactly_v = true;
 
@@ -276,7 +296,7 @@ class Tuple
 
     template <class... U>
     [[nodiscard]] friend constexpr bool operator==(const Tuple& lhs, const Tuple<U...>& rhs)  //
-        requires(sizeof...(T) == sizeof...(U))
+        requires(sizeof...(T) == sizeof...(U) && (true && ... && detail::EqualityComparableWith<T, U>))
     {
         return const_cast<Tuple&>(lhs).lambda(
             [&](const detail::WrapT<T>&... v_lhs)
