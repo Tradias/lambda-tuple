@@ -25,7 +25,7 @@ jobs:
             name: 'Windows/2022/MSVC',
             os: windows-2022,
             build-type: 'Release',
-            parallel: 1,
+            parallel: 2,
           }
           - {
             name: 'MacOSX/11/AppleClang',
@@ -44,15 +44,17 @@ jobs:
       run: cmake --build --preset default --config ${{ matrix.config.build-type }} --parallel ${{ matrix.config.parallel }}
 
     - name: Test
-      run: build/test/${{ matrix.config.build-type }}/lambda-tuple-test
-      shell: bash
+      if: matrix.config.os == 'windows-2022'
+      run: build/test/${{ matrix.config.build-type }}/lambda-tuple-test.exe
+
+    - name: Test
+      if: matrix.config.os == 'macos-11'
+      run: build/test/lambda-tuple-test
 
 
   gcc-build:
     name: 'Ubuntu/20.04/GCC'
     runs-on: ubuntu-20.04
-    env:
-      CMAKE_EXTRA_ARGS: '-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold'
 
     steps:
     - name: Install gcovr
@@ -64,7 +66,15 @@ jobs:
         fetch-depth: 0
 
     - name: GCC 10 Configure CMake
-      run: cmake --preset default -DCMAKE_CXX_COMPILER=$(which g++-10) -DCMAKE_EXPORT_COMPILE_COMMANDS=on -DLAMBDA_TUPLE_TEST_COVERAGE=on -DLAMBDA_TUPLE_GCOV_PROGRAM=$(which gcov-10) -DLAMBDA_TUPLE_COVERAGE_OUTPUT_FILE=${{ github.workspace }}/build/sonarqube-coverage.xml ${{ env.CMAKE_EXTRA_ARGS }} -DCMAKE_BUILD_TYPE=Debug
+      run: |
+        cmake --preset default -DCMAKE_CXX_COMPILER=$(which g++-10) \
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=on \
+        -DLAMBDA_TUPLE_TEST_COVERAGE=on \
+        -DLAMBDA_TUPLE_GCOV_PROGRAM=$(which gcov-10) \
+        -DLAMBDA_TUPLE_COVERAGE_OUTPUT_FILE=${{ github.workspace }}/build/sonarqube-coverage.xml \
+        -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_DISABLE_PRECOMPILE_HEADERS=on
 
     - name: GCC 10 Build
       run: cmake --build --preset default --parallel $(nproc)
@@ -88,7 +98,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         sonar-scanner \
-          -Dsonar.cfamily.compile-commands=${{ github.workspace }}/build/compile_commands.json \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.coverageReportPaths=${{ github.workspace }}/build/sonarqube-coverage.xml
 
@@ -96,14 +105,16 @@ jobs:
   clang-build:
     name: 'Ubuntu/20.04/Clang'
     runs-on: ubuntu-20.04
-    env:
-      CMAKE_EXTRA_ARGS: '"-DCMAKE_CXX_FLAGS=-stdlib=libc++ -stdlib++-isystem /usr/lib/llvm-10/include/c++/v1/ -Wno-unused-command-line-argument" -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld'
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Clang 10 Configure CMake
-      run: cmake --preset default -DCMAKE_CXX_COMPILER=$(which clang++-10) ${{ env.CMAKE_EXTRA_ARGS }} -DCMAKE_BUILD_TYPE=Release
+      run: |
+        cmake --preset default -DCMAKE_CXX_COMPILER=$(which clang++-10) \
+        "-DCMAKE_CXX_FLAGS=-stdlib=libc++ -stdlib++-isystem /usr/lib/llvm-10/include/c++/v1/ -Wno-unused-command-line-argument" \
+        -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld \
+        -DCMAKE_BUILD_TYPE=Release
 
     - name: Clang 10 Build
       run: cmake --build --preset default --config Release --parallel $(nproc)
