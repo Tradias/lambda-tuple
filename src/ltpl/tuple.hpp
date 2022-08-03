@@ -276,7 +276,7 @@ class Tuple
 
     template <class... U>
     [[nodiscard]] friend constexpr bool operator==(const Tuple& lhs, const Tuple<U...>& rhs)  //
-        requires(sizeof...(T) == sizeof...(U) && (true && ... && std::equality_comparable_with<T, U>))
+        requires(sizeof...(T) == sizeof...(U))
     {
         return const_cast<Tuple&>(lhs).lambda(
             [&](const detail::WrapT<T>&... v_lhs)

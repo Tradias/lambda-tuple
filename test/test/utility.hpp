@@ -37,7 +37,7 @@ struct CopyOnly
 
     CopyOnly& operator=(CopyOnly&&) = delete;
 
-    friend auto operator<=>(const CopyOnly&, const CopyOnly&) = default;
+    friend bool operator==(const CopyOnly&, const CopyOnly&) = default;
 };
 
 struct MoveOnly
@@ -66,7 +66,7 @@ struct MoveOnly
         return *this;
     }
 
-    friend auto operator<=>(const MoveOnly&, const MoveOnly&) = default;
+    friend bool operator==(const MoveOnly&, const MoveOnly&) = default;
 
     constexpr explicit operator bool() const noexcept { return !is_moved_from; }
 };
@@ -87,8 +87,8 @@ struct Immovable
 
     Immovable& operator=(Immovable&&) = delete;
 
-    friend auto operator<=>(const Immovable&, const Immovable&) = default;
+    friend bool operator==(const Immovable&, const Immovable&) = default;
 };
 }  // namespace test
 
-#endif // LTPL_TEST_UTILITY_HPP
+#endif  // LTPL_TEST_UTILITY_HPP
