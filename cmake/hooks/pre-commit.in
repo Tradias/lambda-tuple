@@ -1,0 +1,3 @@
+#!/bin/bash
+
+"@CMAKE_COMMAND@" -P "@LAMBDA_TUPLE_GIT_HOOKS_TARGET_DIR@/LambdaTuplePreCommit.cmake"

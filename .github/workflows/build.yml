@@ -1,0 +1,112 @@
+name: Build
+
+on:
+  push:
+    paths:
+      - '**.cpp'
+      - '**.hpp'
+      - '**.ipp'
+      - '**.cmake'
+      - '**.cmake.in'
+      - '**/CMakeLists.txt'
+      - '.github/workflows/build.yml'
+      - 'sonar-project.properties'
+      - 'CMakePresets.json'
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: 'Windows/2022/MSVC',
+            os: windows-2022,
+            build-type: 'Release',
+            parallel: 1,
+          }
+          - {
+            name: 'MacOSX/11/AppleClang',
+            os: macos-11,
+            build-type: 'Debug',
+            parallel: 3,
+          }
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure CMake
+      run: cmake --preset default -DCMAKE_BUILD_TYPE=${{ matrix.config.build-type }}
+
+    - name: Build
+      run: cmake --build --preset default --config ${{ matrix.config.build-type }} --parallel ${{ matrix.config.parallel }}
+
+    - name: Test
+      run: build/test/${{ matrix.config.build-type }}/lambda-tuple-test
+      shell: bash
+
+
+  gcc-build:
+    name: 'Ubuntu/20.04/GCC'
+    runs-on: ubuntu-20.04
+    env:
+      CMAKE_EXTRA_ARGS: '-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold'
+
+    steps:
+    - name: Install gcovr
+      run: sudo apt-get install gcovr
+
+    - uses: actions/checkout@v2
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of sonarsource reporting
+        fetch-depth: 0
+
+    - name: GCC 10 Configure CMake
+      run: cmake --preset default -DCMAKE_CXX_COMPILER=$(which g++-10) -DCMAKE_EXPORT_COMPILE_COMMANDS=on -DLAMBDA_TUPLE_TEST_COVERAGE=on -DLAMBDA_TUPLE_GCOV_PROGRAM=$(which gcov-10) -DLAMBDA_TUPLE_COVERAGE_OUTPUT_FILE=${{ github.workspace }}/build/sonarqube-coverage.xml ${{ env.CMAKE_EXTRA_ARGS }} -DCMAKE_BUILD_TYPE=Debug
+
+    - name: GCC 10 Build
+      run: cmake --build --preset default --parallel $(nproc)
+
+    - name: GCC 10 Test
+      run: build/test/lambda-tuple-test
+
+    - name: GCC 10 Install
+      run: cmake --install build --prefix build/out
+
+    - name: GCC 10 Coverage
+      run: cmake --build ${{ github.workspace }}/build --config Debug --target lambda-tuple-test-coverage
+
+    - name: Download sonar-scanner
+      uses: warchant/setup-sonar-scanner@v3
+      with:
+        version: 4.7.0.2747
+
+    - name: Run sonar-scanner
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        sonar-scanner \
+          -Dsonar.cfamily.compile-commands=${{ github.workspace }}/build/compile_commands.json \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+          -Dsonar.coverageReportPaths=${{ github.workspace }}/build/sonarqube-coverage.xml
+
+
+  clang-build:
+    name: 'Ubuntu/20.04/Clang'
+    runs-on: ubuntu-20.04
+    env:
+      TRIPLET: 'x64-linux-clang-release'
+      CMAKE_EXTRA_ARGS: '"-DCMAKE_CXX_FLAGS=-stdlib=libc++ -stdlib++-isystem /usr/lib/llvm-10/include/c++/v1/ -Wno-unused-command-line-argument" -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld'
+
+    - uses: actions/checkout@v2
+
+    - name: Clang 10 Configure CMake
+      run: cmake --preset default -DCMAKE_CXX_COMPILER=$(which clang++-10) ${{ env.CMAKE_EXTRA_ARGS }} -DCMAKE_BUILD_TYPE=Release
+
+    - name: Clang 10 Build
+      run: cmake --build --preset default --config Release --parallel $(nproc)
+
+    - name: Clang 10 Test
+      run: build/test/lambda-tuple-test
