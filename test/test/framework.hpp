@@ -42,7 +42,7 @@ struct Context
 {
     int tests_run;
     int failed_tests;
-    int current_failed_assertions;
+    int current_failed_checks;
     FailedCheck failed_checks[128];
 };
 
@@ -50,12 +50,12 @@ static Context context{};
 
 TEST_LTPL_NOINLINE inline void run_test_impl(void (*test)(), StringView test_name)
 {
-    context.current_failed_assertions = 0;
+    context.current_failed_checks = 0;
     test();
-    if (context.current_failed_assertions > 0)
+    if (context.current_failed_checks > 0)
     {
         ++context.failed_tests;
-        for (int i = 0; i < context.current_failed_assertions; ++i)
+        for (int i = 0; i < context.current_failed_checks; ++i)
         {
             auto& [expression, location] = context.failed_checks[i];
             ::printf("Failure: %s:(%u) in \"%.*s\"\n  %s(%s%s%s)\n\n", location.file, location.line, test_name.size,
@@ -89,8 +89,8 @@ TEST_LTPL_NOINLINE inline void check(bool result, Expression expression,
 {
     if (!result)
     {
-        context.failed_checks[context.current_failed_assertions] = {expression, location};
-        ++context.current_failed_assertions;
+        context.failed_checks[context.current_failed_checks] = {expression, location};
+        ++context.current_failed_checks;
     }
 }
 }  // namespace test

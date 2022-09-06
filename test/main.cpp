@@ -13,6 +13,7 @@
 #include <test_dev11_0343056_pair_tuple_ctor_sfinae.hpp>
 #include <test_dev11_0607540_pair_tuple_rvalue_references.hpp>
 #include <test_move_assignment.hpp>
+#include <test_swap.hpp>
 
 int main()
 {
@@ -120,6 +121,18 @@ int main()
     run_test<&test_move_assignment_rref_value<StdTuple>>();
     run_test<&test_move_assignment_lref_rref<LambdaTuple>>();
     run_test<&test_move_assignment_lref_rref<StdTuple>>();
+
+    // test_move_assignment
+    run_test<&test_swap_value<LambdaTuple>>();
+    run_test<&test_swap_value<StdTuple>>();
+    run_test<&test_swap_lref<LambdaTuple>>();
+    run_test<&test_swap_lref<StdTuple>>();
+    run_test<&test_swap_const_lref<LambdaTuple>>();
+    run_test<&test_swap_const_lref<StdTuple>>();
+    run_test<&test_unswappable_const_lref<LambdaTuple>>();
+    run_test<&test_unswappable_const_lref<StdTuple>>();
+    run_test<&test_unswappable_immovable<LambdaTuple>>();
+    run_test<&test_unswappable_immovable<StdTuple>>();
 
     // Microsoft STL
     run_test<&test_Dev10_646556_construct_tuple_from_const>();

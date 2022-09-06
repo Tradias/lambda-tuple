@@ -19,7 +19,7 @@ void test_move_assignment_value_value()
     TupleT<T, MoveOnly> tuple(MoveOnly{1});
     TupleT<T, MoveOnly> tuple2(MoveOnly{2});
     tuple2 = std::move(tuple);
-    CHECK_FALSE(T::template get<0>(tuple));
+    CHECK(T::template get<0>(tuple).is_moved_from);
     CHECK_EQ(MoveOnly{1}, T::template get<0>(tuple2));
 }
 
@@ -57,7 +57,7 @@ void test_move_assignment_value_lref()
     MoveOnly c{2};
     TupleT<T, MoveOnly&> tuple2(c);
     tuple2 = std::move(tuple);
-    CHECK_FALSE(T::template get<0>(tuple));
+    CHECK(T::template get<0>(tuple).is_moved_from);
     CHECK_EQ(MoveOnly{1}, c);
     CHECK_EQ(MoveOnly{1}, T::template get<0>(tuple2));
 }
@@ -101,8 +101,8 @@ void test_move_assignment_rref_lref()
     MoveOnly c2{2};
     TupleT<T, MoveOnly&> tuple2(c2);
     tuple2 = std::move(tuple);
-    CHECK_FALSE(c);
-    CHECK_FALSE(T::template get<0>(tuple));
+    CHECK(c.is_moved_from);
+    CHECK(T::template get<0>(tuple).is_moved_from);
     CHECK_EQ(MoveOnly{1}, c2);
     CHECK_EQ(MoveOnly{1}, T::template get<0>(tuple2));
 }
@@ -114,7 +114,7 @@ void test_move_assignment_rref_value()
     MoveOnly c2{2};
     TupleT<T, MoveOnly&&> tuple2(std::move(c2));
     tuple2 = std::move(tuple);
-    CHECK_FALSE(T::template get<0>(tuple));
+    CHECK(T::template get<0>(tuple).is_moved_from);
     CHECK_EQ(MoveOnly{1}, c2);
     CHECK_EQ(MoveOnly{1}, T::template get<0>(tuple2));
 }

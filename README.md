@@ -29,7 +29,7 @@ I would consider it more of a toy implementation. Nonetheless, there is an exten
 * Cannot be passed across DLL boundaries.
 * No in-place construction, just like `std::tuple`.
 * Triviallity of copy/move assignment of types is not preserved, just like `std::tuple`.
-* No empty-base optimization because the standard does not allow attributes on lambda captures.
+* No empty-class optimization because attributes on lambda captures are not allowed.
 
 # Installation
 

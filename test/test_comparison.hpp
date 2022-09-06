@@ -74,7 +74,11 @@ void test_equality_compare_value_rref()
     CHECK_EQ(tuple3, tuple);
 }
 
-void test_not_equality_comparable() { CHECK_FALSE(EqualityComparableWith<ltpl::Tuple<int>, ltpl::Tuple<const char*>>); }
+void test_not_equality_comparable()
+{
+    CHECK_FALSE(WeaklyEqualityComparableWith<ltpl::Tuple<>, ltpl::Tuple<const char*>>);
+    CHECK_FALSE(WeaklyEqualityComparableWith<ltpl::Tuple<int>, ltpl::Tuple<const char*>>);
+}
 }  // namespace test
 
 #endif  // LTPL_TEST_TEST_COMPARISON_HPP

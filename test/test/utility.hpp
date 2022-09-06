@@ -39,12 +39,15 @@ struct CopyOnly
     CopyOnly& operator=(CopyOnly&&) = delete;
 
     friend bool operator==(const CopyOnly&, const CopyOnly&) = default;
+
+    friend void swap(const CopyOnly&, const CopyOnly&) {}
 };
 
 struct MoveOnly
 {
     int v{};
     bool is_moved_from{};
+    bool is_swapped{};
 
     MoveOnly() = default;
 
@@ -69,7 +72,11 @@ struct MoveOnly
 
     friend bool operator==(const MoveOnly&, const MoveOnly&) = default;
 
-    constexpr explicit operator bool() const noexcept { return !is_moved_from; }
+    friend void swap(MoveOnly& lhs, MoveOnly& rhs)
+    {
+        lhs.is_swapped = true;
+        rhs.is_swapped = true;
+    }
 };
 
 struct Immovable
@@ -95,7 +102,8 @@ template <class T, class U>
 concept ConvertibleTo = std::is_convertible_v<T, U>;
 
 template <class T, class U>
-concept EqualityComparableWith = requires(const std::remove_reference_t<T>& t, const std::remove_reference_t<U>& u)
+concept WeaklyEqualityComparableWith = requires(const std::remove_reference_t<T>& t,
+                                                const std::remove_reference_t<U>& u)
 {
     {
         t == u

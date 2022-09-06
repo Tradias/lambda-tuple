@@ -146,9 +146,8 @@ void test_concepts()
 
 void test_sizeof()
 {
-    using Tuple = ltpl::Tuple<int, Empty>;
-    // CHECK_EQ(sizeof(int), sizeof(Tuple));
-    CHECK_EQ(alignof(int), alignof(Tuple));
+    CHECK_EQ(sizeof(ltpl::Tuple<int, Empty>), sizeof(ltpl::Tuple<Empty, int>));
+    CHECK_EQ(alignof(int), alignof(ltpl::Tuple<int, Empty>));
 }
 
 void test_std_tuple_int_Empty()

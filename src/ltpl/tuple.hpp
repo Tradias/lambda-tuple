@@ -39,7 +39,8 @@ template <class T, class U>
 concept ConvertibleTo = std::is_convertible_v<T, U>;
 
 template <class T, class U>
-concept EqualityComparableWith = requires(const std::remove_reference_t<T>& t, const std::remove_reference_t<U>& u)
+concept WeaklyEqualityComparableWith = requires(const std::remove_reference_t<T>& t,
+                                                const std::remove_reference_t<U>& u)
 {
     {
         t == u
@@ -296,7 +297,7 @@ class Tuple
 
     template <class... U>
     [[nodiscard]] friend constexpr bool operator==(const Tuple& lhs, const Tuple<U...>& rhs)  //
-        requires(sizeof...(T) == sizeof...(U) && (true && ... && detail::EqualityComparableWith<T, U>))
+        requires(sizeof...(T) == sizeof...(U) && (true && ... && detail::WeaklyEqualityComparableWith<T, U>))
     {
         return const_cast<Tuple&>(lhs).lambda(
             [&](const detail::WrapT<T>&... v_lhs)
@@ -305,6 +306,40 @@ class Tuple
                     [&](const detail::WrapT<U>&... v_rhs)
                     {
                         return (true && ... && (static_cast<const T&>(v_lhs) == static_cast<const U&>(v_rhs)));
+                    });
+            });
+    }
+
+    template <class... U>
+    friend constexpr void swap(Tuple& lhs, Tuple& rhs)                 //
+        noexcept(std::conjunction_v<std::is_nothrow_swappable<T>...>)  //
+        requires(std::conjunction_v<std::is_swappable<T>...>)
+    {
+        return lhs.lambda(
+            [&](detail::WrapT<T>&... v_lhs)
+            {
+                return rhs.lambda(
+                    [&](detail::WrapT<T>&... v_rhs)
+                    {
+                        using std::swap;
+                        (void(swap(static_cast<T&>(v_lhs), static_cast<T&>(v_rhs))), ...);
+                    });
+            });
+    }
+
+    template <class... U>
+    friend constexpr void swap(const Tuple& lhs, const Tuple& rhs)           //
+        noexcept(std::conjunction_v<std::is_nothrow_swappable<const T>...>)  //
+        requires(std::conjunction_v<std::is_swappable<const T>...>)
+    {
+        return const_cast<Tuple&>(lhs).lambda(
+            [&](const detail::WrapT<T>&... v_lhs)
+            {
+                return const_cast<Tuple&>(rhs).lambda(
+                    [&](const detail::WrapT<T>&... v_rhs)
+                    {
+                        using std::swap;
+                        (void(swap(static_cast<const T&>(v_lhs), static_cast<const T&>(v_rhs))), ...);
                     });
             });
     }
