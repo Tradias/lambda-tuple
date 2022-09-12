@@ -270,7 +270,7 @@ class Tuple
         // We have to const_cast because the lambda's operator() is mutable. But since we cast each element to const& to
         // UB can occur.
         : lambda(const_cast<Tuple<U...>&>(other).lambda(
-              [&](const detail::WrapT<U>&... v_other)
+              [](const detail::WrapT<U>&... v_other)
               {
                   return detail::make_lambda<T...>(detail::Wrap<T>::wrap(static_cast<const U&>(v_other))...);
               }))
@@ -285,7 +285,7 @@ class Tuple
         requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_constructible<T, U>...> &&
                  detail::is_converting_move_constructor_v<Tuple, U...>)
         : lambda(other.lambda(
-              [&](detail::WrapT<U>&... v_other)
+              [](detail::WrapT<U>&... v_other)
               {
                   return detail::make_lambda<T...>(detail::Wrap<T>::wrap(static_cast<U&&>(v_other))...);
               }))
@@ -304,7 +304,7 @@ class Tuple
         requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_assignable<T&, const U&>...>)
     {
         lambda(
-            [&](detail::WrapT<T>&... t)
+            [&other](detail::WrapT<T>&... t)
             {
                 const_cast<Tuple<U...>&>(other).lambda(
                     [&](const detail::WrapT<U>&... v_other)
@@ -324,7 +324,7 @@ class Tuple
         requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_assignable<T&, U>...>)
     {
         lambda(
-            [&](detail::WrapT<T>&... t)
+            [&other](detail::WrapT<T>&... t)
             {
                 other.lambda(
                     [&](detail::WrapT<U>&... v_other)
@@ -341,7 +341,7 @@ class Tuple
         requires(sizeof...(T) == sizeof...(U) && (true && ... && detail::WeaklyEqualityComparableWith<T, U>))
     {
         return const_cast<Tuple&>(lhs).lambda(
-            [&](const detail::WrapT<T>&... v_lhs)
+            [&rhs](const detail::WrapT<T>&... v_lhs)
             {
                 return detail::Access::lambda(const_cast<Tuple<U...>&>(rhs))(
                     [&](const detail::WrapT<U>&... v_rhs)
@@ -357,7 +357,7 @@ class Tuple
         requires(std::conjunction_v<std::is_swappable<T>...>)
     {
         return lhs.lambda(
-            [&](detail::WrapT<T>&... v_lhs)
+            [&rhs](detail::WrapT<T>&... v_lhs)
             {
                 return rhs.lambda(
                     [&](detail::WrapT<T>&... v_rhs)
@@ -375,7 +375,7 @@ class Tuple
         requires(std::conjunction_v<std::is_swappable<const T>...>)
     {
         return const_cast<Tuple&>(lhs).lambda(
-            [&](const detail::WrapT<T>&... v_lhs)
+            [&rhs](const detail::WrapT<T>&... v_lhs)
             {
                 return const_cast<Tuple&>(rhs).lambda(
                     [&](const detail::WrapT<T>&... v_rhs)

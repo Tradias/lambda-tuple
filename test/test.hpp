@@ -10,8 +10,7 @@
 #include <test/framework.hpp>
 #include <test/utility.hpp>
 
-#include <string>
-#include <tuple>
+#include <functional>
 
 namespace test
 {
