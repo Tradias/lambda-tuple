@@ -77,11 +77,35 @@ void test_converting_rref_arg_constructor()
 }
 
 template <class T>
-void test_const_lref_copy_constructor()
+void test_copy_constructor()
 {
     TupleT<T, int, CopyOnly> tuple{2, CopyOnly{1}};
     auto tuple2{tuple};
     CHECK_EQ(tuple, tuple2);
+}
+
+template <class T>
+void test_const_lref_copy_constructor()
+{
+    const CopyOnly c;
+    TupleT<T, int, const CopyOnly&> tuple{2, c};
+    auto tuple2{tuple};
+    CHECK_EQ(tuple, tuple2);
+}
+
+template <class T>
+void test_rref_copy_constructor()
+{
+    CHECK_FALSE(std::is_constructible_v<TupleT<T, int, MoveOnly>, const TupleT<T, int, MoveOnly&&>&>);
+}
+
+template <class T>
+void test_rref_copy_constructor_does_not_move()
+{
+    BasicMoveOnly<true> c;
+    TupleT<T, int, BasicMoveOnly<true>&&> tuple{2, std::move(c)};
+    TupleT<T, int, BasicMoveOnly<true>> tuple2{tuple};
+    CHECK_FALSE(c.is_moved_from);
 }
 
 template <class T>

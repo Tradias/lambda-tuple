@@ -43,41 +43,47 @@ struct CopyOnly
     friend void swap(const CopyOnly&, const CopyOnly&) {}
 };
 
-struct MoveOnly
+template <bool IsCopyable>
+struct BasicMoveOnly
 {
     int v{};
     bool is_moved_from{};
     bool is_swapped{};
 
-    MoveOnly() = default;
+    BasicMoveOnly() = default;
 
-    constexpr explicit MoveOnly(int v) noexcept : v(v) {}
+    constexpr explicit BasicMoveOnly(int v) noexcept : v(v) {}
 
-    constexpr MoveOnly(ImplicitTag&& t) noexcept : v(t.v) {}
+    constexpr BasicMoveOnly(ImplicitTag&& t) noexcept : v(t.v) {}
 
-    MoveOnly(const MoveOnly&) = delete;
+    BasicMoveOnly(const BasicMoveOnly&) requires(IsCopyable) = default;
 
-    constexpr MoveOnly(MoveOnly&& other) noexcept : v(other.v), is_moved_from(std::exchange(other.is_moved_from, true))
+    BasicMoveOnly(const BasicMoveOnly&) requires(!IsCopyable) = delete;
+
+    constexpr BasicMoveOnly(BasicMoveOnly&& other) noexcept
+        : v(other.v), is_moved_from(std::exchange(other.is_moved_from, true))
     {
     }
 
-    MoveOnly& operator=(const MoveOnly&) = delete;
+    BasicMoveOnly& operator=(const BasicMoveOnly&) = delete;
 
-    constexpr MoveOnly& operator=(MoveOnly&& other) noexcept
+    constexpr BasicMoveOnly& operator=(BasicMoveOnly&& other) noexcept
     {
         v = other.v;
         is_moved_from = std::exchange(other.is_moved_from, true);
         return *this;
     }
 
-    friend bool operator==(const MoveOnly&, const MoveOnly&) = default;
+    friend bool operator==(const BasicMoveOnly&, const BasicMoveOnly&) = default;
 
-    friend void swap(MoveOnly& lhs, MoveOnly& rhs)
+    friend void swap(BasicMoveOnly& lhs, BasicMoveOnly& rhs)
     {
         lhs.is_swapped = true;
         rhs.is_swapped = true;
     }
 };
+
+using MoveOnly = BasicMoveOnly<false>;
 
 struct Immovable
 {

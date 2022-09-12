@@ -13,6 +13,7 @@
 #include <test_dev11_0343056_pair_tuple_ctor_sfinae.hpp>
 #include <test_dev11_0607540_pair_tuple_rvalue_references.hpp>
 #include <test_move_assignment.hpp>
+#include <test_structured_binding.hpp>
 #include <test_swap.hpp>
 
 int main()
@@ -49,8 +50,14 @@ int main()
     run_test<&test_converting_const_lref_arg_constructor<StdTuple>>();
     run_test<&test_converting_rref_arg_constructor<LambdaTuple>>();
     run_test<&test_converting_rref_arg_constructor<StdTuple>>();
+    run_test<&test_copy_constructor<LambdaTuple>>();
+    run_test<&test_copy_constructor<StdTuple>>();
     run_test<&test_const_lref_copy_constructor<LambdaTuple>>();
     run_test<&test_const_lref_copy_constructor<StdTuple>>();
+    run_test<&test_rref_copy_constructor<LambdaTuple>>();
+    run_test<&test_rref_copy_constructor<StdTuple>>();
+    run_test<&test_rref_copy_constructor_does_not_move<LambdaTuple>>();
+    run_test<&test_rref_copy_constructor_does_not_move<StdTuple>>();
     run_test<&test_implicit_converting_copy_constructor<LambdaTuple>>();
     run_test<&test_implicit_converting_copy_constructor<StdTuple>>();
     run_test<&test_implicit_converting_lref__arg_constructor<LambdaTuple>>();
@@ -140,18 +147,26 @@ int main()
     run_test<&test_Dev11_0343056_pair_tuple_ctor_sfinae>();
     run_test<&test_Dev11_0607540_pair_tuple_rvalue_references>();
 
+    // test_structured_binding
+    run_test<&test_value_structured_binding<LambdaTuple>>();
+    run_test<&test_value_structured_binding<StdTuple>>();
+    run_test<&test_lref_structured_binding<LambdaTuple>>();
+    run_test<&test_lref_structured_binding<StdTuple>>();
+    run_test<&test_lef_structured_binding_from_const<LambdaTuple>>();
+    run_test<&test_lef_structured_binding_from_const<StdTuple>>();
+    run_test<&test_rref_structured_binding<LambdaTuple>>();
+    run_test<&test_rref_structured_binding<StdTuple>>();
+    run_test<&test_rref_structured_binding_from_move<LambdaTuple>>();
+    run_test<&test_rref_structured_binding_from_move<StdTuple>>();
+
     // test
-    run_test<&test_move_assignment>();
-    run_test<&test_structured_binding>();
-    run_test<&test_ref>();
-    run_test<&test_const_ref>();
-    run_test<&test_move>();
-    run_test<&test_forward_as_tuple>();
-    run_test<&test_std_tuple_forward_as_tuple>();
     run_test<&test_constexpr>();
     run_test<&test_concepts>();
     run_test<&test_sizeof>();
-    run_test<&test_std_tuple_int_Empty>();
+    run_test<&test_tuple_element_rref>();
+    run_test<&test_forward_as_tuple>();
+    run_test<&test_tie>();
+    run_test<&test_make_tuple>();
 
     print_test_results();
     return context.failed_tests;
