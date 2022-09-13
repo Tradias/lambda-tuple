@@ -17,6 +17,8 @@ namespace test
 {
 struct SourceLocation
 {
+    constexpr SourceLocation() noexcept : file(""), function(""), line(0), column(0) {}
+
     constexpr SourceLocation(char const* file, std::uint_least32_t ln, char const* function,
                              std::uint_least32_t col = 0) noexcept
         : file(file), function(function), line(ln), column(col)
