@@ -14,6 +14,8 @@ The idea is to store all elements of the tuple in such a lambda:
 
 I would consider it more of a toy implementation. Nonetheless, there is an extensive test suite including several tests from the Microsoft STL.
 
+Play with it on [godbolt](https://godbolt.org/z/KW43rbTG6).
+
 ## Advantages
 
 * Triviallity of copy/move construction of types is preserved.
@@ -22,14 +24,14 @@ I would consider it more of a toy implementation. Nonetheless, there is an exten
 * Automatic pretty-printing in the debugger. E.g. for `tuple<int, double>`   
 ![Lambda-tuple pretty-print](doc/pretty-print.png "pretty-printing")
 * An empty tuple is `std::is_trivial_v`.
-* Fast to compile?
+* Roughly 2.6 times faster to compile with GCC and 1.9 times faster with Clang. ([build-bench](https://build-bench.com/b/eT0y_KsZ342kkIbMw8tndVLquC8))
+* The compiler is allowed to re-order the elements captured in the lambda. In practice however, none of the major compilers seem to make use of it to perform empty-class optimization. ([godbolt](https://godbolt.org/z/xqejPbczf))
 
 ## Disadvantages
 
 * Cannot be passed across DLL boundaries.
 * No in-place construction, just like `std::tuple`.
 * Triviallity of copy/move assignment of types is not preserved, just like `std::tuple`.
-* No empty-class optimization because attributes on lambda captures are not allowed.
 
 # Installation
 
