@@ -19,13 +19,12 @@ Play with it on [godbolt](https://godbolt.org/z/KW43rbTG6).
 ## Advantages
 
 * Triviallity of copy/move construction of types is preserved.
-* Consistent sizeof independent from the order of types, unlike most std::tuple implementations.
 * No template or function recursion used in the implementation. (except `std::conjunction` in requires and noexcept specifiers)
 * Automatic pretty-printing in the debugger. E.g. for `tuple<int, double>`   
 ![Lambda-tuple pretty-print](doc/pretty-print.png "pretty-printing")
 * An empty tuple is `std::is_trivial_v`.
 * Roughly 2.6 times faster to compile with GCC and 1.9 times faster with Clang. ([build-bench](https://build-bench.com/b/eT0y_KsZ342kkIbMw8tndVLquC8))
-* The compiler is allowed to re-order the elements captured in the lambda. In practice however, none of the major compilers seem to make use of it to perform empty-class optimization. ([godbolt](https://godbolt.org/z/xqejPbczf))
+* The compiler is allowed to re-order elements captured in the lambda to minimize its size (by ordering elements by their `sizeof` or performing empty-class optimization). In practice, however, none of the major compilers seem to make use of it. ([godbolt](https://godbolt.org/z/xqejPbczf))
 
 ## Disadvantages
 
