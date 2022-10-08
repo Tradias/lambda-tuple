@@ -158,6 +158,8 @@ int main()
     run_test<&test_rref_structured_binding<StdTuple>>();
     run_test<&test_rref_structured_binding_from_move<LambdaTuple>>();
     run_test<&test_rref_structured_binding_from_move<StdTuple>>();
+    run_test<&test_rref_structured_binding_from_const_move<LambdaTuple>>();
+    run_test<&test_rref_structured_binding_from_const_move<StdTuple>>();
 
     // test
     run_test<&test_constexpr>();

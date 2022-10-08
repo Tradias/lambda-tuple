@@ -66,6 +66,18 @@ void test_rref_structured_binding_from_move()
     CHECK_EQ(2, c.v);
     CHECK(std::is_same_v<MoveOnly&, decltype(a)>);
 }
+
+template <class T>
+void test_rref_structured_binding_from_const_move()
+{
+    MoveOnly c{1};
+    const TupleT<T, MoveOnly&, double> tuple{c, 12.};
+    auto&& [a, b] = std::move(tuple);
+    a = MoveOnly{2};
+    CHECK_EQ(2, c.v);
+    CHECK(std::is_same_v<MoveOnly&, decltype(a)>);
+    CHECK(std::is_same_v<const double&&, decltype(T::template get<1>(std::move(tuple)))>);
+}
 }  // namespace test
 
 #endif  // LTPL_TEST_TEST_STRUCTURED_BINDING_HPP

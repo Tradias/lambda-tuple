@@ -203,7 +203,7 @@ constexpr auto make_lambda(WrapT<T>... v)
 }
 
 // An implementation of nth-element similar to the `Concept expansion` described by Kris Jusiak in his talk `The Nth
-// Element: A Case Study - CppNow 2022` but compatible with every C++20 compiler.
+// Element: A Case Study - CppNow 2022` but compatible with every C++20 compiler and easily backportable to C++14.
 template <std::size_t I, class... T>
 constexpr decltype(auto) get(ltpl::Tuple<T...>& tuple) noexcept
 {
@@ -256,7 +256,7 @@ class Tuple
         noexcept(std::conjunction_v<std::is_nothrow_constructible<T, U>...>)  //
         requires(sizeof...(T) == sizeof...(U) && sizeof...(T) >= 1 &&
                  std::conjunction_v<std::is_constructible<T, U>...> && detail::is_not_exactly_v<Tuple, U...>)
-        : lambda(detail::make_lambda<T...>(detail::Wrap<T>::wrap(std::forward<U>(v))...))
+        : lambda(detail::make_lambda<T...>(detail::Wrap<T>::wrap(static_cast<U&&>(v))...))
     {
     }
 
@@ -429,7 +429,7 @@ template <std::size_t I, class... T>
 template <class... T>
 constexpr Tuple<typename std::unwrap_ref_decay<T>::type...> make_tuple(T&&... v)
 {
-    return Tuple<typename std::unwrap_ref_decay<T>::type...>(std::forward<T>(v)...);
+    return Tuple<typename std::unwrap_ref_decay<T>::type...>(static_cast<T&&>(v)...);
 }
 
 template <class... T>
@@ -441,7 +441,7 @@ template <class... T>
 template <class... T>
 [[nodiscard]] constexpr Tuple<T&&...> forward_as_tuple(T&&... v) noexcept
 {
-    return Tuple<T&&...>(std::forward<T>(v)...);
+    return Tuple<T&&...>(static_cast<T&&>(v)...);
 }
 }  // namespace ltpl
 
