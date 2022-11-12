@@ -80,6 +80,8 @@ int main()
     run_test<&test_implicit_converting_tuple_of_tuple_value_arg_constructor<StdTuple>>();
     run_test<&test_implicit_converting_tuple_of_tuple_rref_arg_constructor<LambdaTuple>>();
     run_test<&test_implicit_converting_tuple_of_tuple_rref_arg_constructor<StdTuple>>();
+    run_test<&test_no_unwrap_reference_wrapper_constructor>();
+    run_test<&test_copy_list_initialization>();
 
     // test_copy_assignment
     run_test<&test_copy_assignment_value_value<LambdaTuple>>();

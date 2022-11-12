@@ -214,6 +214,23 @@ void test_implicit_converting_tuple_of_tuple_rref_arg_constructor()
     CHECK_EQ(MoveOnly{1}, T::template get<0>(T::template get<0>(tuple2)));
     CHECK_FALSE(std::is_constructible_v<TupleT<T, MoveOnly>, TupleT<T, TupleT<T, ImplicitTag&&>>>);
 }
+
+void test_no_unwrap_reference_wrapper_constructor()
+{
+    MoveOnly c;
+    ltpl::Tuple ltpl_tuple{std::ref(c)};
+    std::tuple std_tuple{std::ref(c)};
+    CHECK(std::is_same_v<std::tuple_element_t<0, decltype(std_tuple)>, std::tuple_element_t<0, decltype(ltpl_tuple)>>);
+}
+
+void test_copy_list_initialization()
+{
+    auto copy_list_initialization = []() -> ltpl::Tuple<int, int>
+    {
+        return {1, -1};
+    };
+    CHECK_EQ(ltpl::Tuple(1, -1), copy_list_initialization());
+}
 }  // namespace test
 
 #endif  // LTPL_TEST_TEST_CONSTRUCTOR_HPP
