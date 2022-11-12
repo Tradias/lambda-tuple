@@ -41,21 +41,22 @@ concept ConvertibleTo = std::is_convertible_v<T, U>;
 
 // libc++ does not provide `std::equality_comparable<T>`.
 template <class T, class U>
-concept WeaklyEqualityComparableWith =
-    requires(const std::remove_reference_t<T>& t, const std::remove_reference_t<U>& u) {
-        {
-            t == u
-            } -> ConvertibleTo<bool>;
-        {
-            t != u
-            } -> ConvertibleTo<bool>;
-        {
-            u == t
-            } -> ConvertibleTo<bool>;
-        {
-            u != t
-            } -> ConvertibleTo<bool>;
-    };
+concept WeaklyEqualityComparableWith = requires(const std::remove_reference_t<T>& t,
+                                                const std::remove_reference_t<U>& u)
+{
+    {
+        t == u
+        } -> ConvertibleTo<bool>;
+    {
+        t != u
+        } -> ConvertibleTo<bool>;
+    {
+        u == t
+        } -> ConvertibleTo<bool>;
+    {
+        u != t
+        } -> ConvertibleTo<bool>;
+};
 
 // Test that the types list does not contain just one element that is decay-equal to T.
 template <class T, class, class...>
@@ -66,8 +67,9 @@ inline constexpr bool is_not_exactly_v<T, U> = !std::is_same_v<T, std::remove_cv
 
 // Standard-library compatible tests for the converting copy/move constructor of this Tuple.
 template <class T, class U>
-concept TupleCopyConversion = std::is_same_v<T, U> || std::is_constructible_v<T, const ltpl::Tuple<U>&> ||
-                              std::is_convertible_v<const ltpl::Tuple<U>&, T>;
+concept TupleCopyConversion = std::is_same_v<T, U> || std::is_constructible_v < T,
+        const ltpl::Tuple<U>
+& > || std::is_convertible_v<const ltpl::Tuple<U>&, T>;
 
 template <class, class...>
 inline constexpr bool is_converting_copy_constructor_v = true;
@@ -237,7 +239,7 @@ class Tuple
     constexpr Tuple()  //
         noexcept(std::conjunction_v<std::conjunction<std::is_nothrow_default_constructible<T>,
                                                      std::is_nothrow_move_constructible<T>>...>)  //
-    requires(sizeof...(T) > 0)
+        requires(sizeof...(T) > 0)
         : lambda(detail::make_lambda<T...>(T()...))
     {
     }
@@ -252,8 +254,8 @@ class Tuple
     constexpr explicit(!std::conjunction_v<std::is_convertible<U, T>...>)     //
         Tuple(U&&... v)                                                       //
         noexcept(std::conjunction_v<std::is_nothrow_constructible<T, U>...>)  //
-    requires(sizeof...(T) == sizeof...(U) && sizeof...(T) >= 1 && std::conjunction_v<std::is_constructible<T, U>...> &&
-             detail::is_not_exactly_v<Tuple, U...>)
+        requires(sizeof...(T) == sizeof...(U) && sizeof...(T) >= 1 &&
+                 std::conjunction_v<std::is_constructible<T, U>...> && detail::is_not_exactly_v<Tuple, U...>)
         : lambda(detail::make_lambda<T...>(detail::Wrap<T>::wrap(static_cast<U&&>(v))...))
     {
     }
@@ -263,8 +265,8 @@ class Tuple
     constexpr explicit(!std::conjunction_v<std::is_convertible<const U&, T>...>)     //
         Tuple(const Tuple<U...>& other)                                              //
         noexcept(std::conjunction_v<std::is_nothrow_constructible<T, const U&>...>)  //
-    requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_constructible<T, const U&>...> &&
-             detail::is_converting_copy_constructor_v<Tuple, U...>)
+        requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_constructible<T, const U&>...> &&
+                 detail::is_converting_copy_constructor_v<Tuple, U...>)
         // We have to const_cast because the lambda's operator() is mutable. But since we cast each element to const& no
         // UB can occur.
         : lambda(const_cast<Tuple<U...>&>(other).lambda(
@@ -280,8 +282,8 @@ class Tuple
     constexpr explicit(!std::conjunction_v<std::is_convertible<U, T>...>)            //
         Tuple(Tuple<U...>&& other)                                                   //
         noexcept(std::conjunction_v<std::is_nothrow_constructible<T, const U&>...>)  //
-    requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_constructible<T, U>...> &&
-             detail::is_converting_move_constructor_v<Tuple, U...>)
+        requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_constructible<T, U>...> &&
+                 detail::is_converting_move_constructor_v<Tuple, U...>)
         : lambda(other.lambda(
               [](detail::WrapT<U>&... v_other)
               {
@@ -291,19 +293,15 @@ class Tuple
     }
 
     // An empty Tuple is trivial.
-    Tuple& operator=(const Tuple& other)
-    requires(sizeof...(T) == 0)
-    = default;
+    Tuple& operator=(const Tuple& other) requires(sizeof...(T) == 0) = default;
 
-    Tuple& operator=(Tuple&& other)
-    requires(sizeof...(T) == 0)
-    = default;
+    Tuple& operator=(Tuple&& other) requires(sizeof...(T) == 0) = default;
 
     // Converting copy-assignment operator.
     template <class... U>
     constexpr Tuple& operator=(const Tuple<U...>& other)                           //
         noexcept(std::conjunction_v<std::is_nothrow_assignable<T&, const U&>...>)  //
-    requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_assignable<T&, const U&>...>)
+        requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_assignable<T&, const U&>...>)
     {
         lambda(
             [&other](detail::WrapT<T>&... t)
@@ -323,7 +321,7 @@ class Tuple
     template <class... U>
     constexpr Tuple& operator=(Tuple<U...>&& other)                         //
         noexcept(std::conjunction_v<std::is_nothrow_assignable<T&, U>...>)  //
-    requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_assignable<T&, U>...>)
+        requires(sizeof...(T) == sizeof...(U) && std::conjunction_v<std::is_assignable<T&, U>...>)
     {
         lambda(
             [&other](detail::WrapT<T>&... t)
@@ -340,7 +338,7 @@ class Tuple
     // This comparison operator is SFINAE friendly, which is not required by the C++20 standard.
     template <class... U>
     [[nodiscard]] friend constexpr bool operator==(const Tuple& lhs, const Tuple<U...>& rhs)  //
-    requires(sizeof...(T) == sizeof...(U) && (true && ... && detail::WeaklyEqualityComparableWith<T, U>))
+        requires(sizeof...(T) == sizeof...(U) && (true && ... && detail::WeaklyEqualityComparableWith<T, U>))
     {
         return const_cast<Tuple&>(lhs).lambda(
             [&rhs](const detail::WrapT<T>&... v_lhs)
@@ -356,7 +354,7 @@ class Tuple
     template <class... U>
     friend constexpr void swap(Tuple& lhs, Tuple& rhs)                 //
         noexcept(std::conjunction_v<std::is_nothrow_swappable<T>...>)  //
-    requires(std::conjunction_v<std::is_swappable<T>...>)
+        requires(std::conjunction_v<std::is_swappable<T>...>)
     {
         return lhs.lambda(
             [&rhs](detail::WrapT<T>&... v_lhs)
@@ -374,7 +372,7 @@ class Tuple
     template <class... U>
     friend constexpr void swap(const Tuple& lhs, const Tuple& rhs)           //
         noexcept(std::conjunction_v<std::is_nothrow_swappable<const T>...>)  //
-    requires(std::conjunction_v<std::is_swappable<const T>...>)
+        requires(std::conjunction_v<std::is_swappable<const T>...>)
     {
         return const_cast<Tuple&>(lhs).lambda(
             [&rhs](const detail::WrapT<T>&... v_lhs)
