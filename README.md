@@ -14,7 +14,7 @@ The idea is to store all elements of the tuple in such a lambda:
 
 I would consider it more of a toy implementation. Nonetheless, there is an extensive test suite including several tests from the Microsoft STL amounting to 75+ tests in total.
 
-Play with it on [godbolt](https://godbolt.org/z/KW43rbTG6).
+Play with it on [godbolt](https://godbolt.org/z/ajxavsrnM).
 
 ## Advantages
 
@@ -30,7 +30,7 @@ Play with it on [godbolt](https://godbolt.org/z/KW43rbTG6).
 * Cannot be passed across DLL boundaries.
 * No in-place construction, just like `std::tuple`.
 * Triviallity of copy/move assignment of types is not preserved, just like `std::tuple`.
-* The compiler is allowed to re-order elements captured in the lambda to minimize its size (by ordering elements by their `sizeof` or performing empty-class optimization). In practice, however, none of the major compilers seem to make use of it. ([godbolt](https://godbolt.org/z/xqejPbczf))
+* The compiler is allowed to re-order elements captured in the lambda to minimize its size (by ordering elements by their `sizeof` or performing empty-class optimization). In practice, however, none of the major compilers seem to make use of it. ([godbolt](https://godbolt.org/z/Y5qbMe5Ge))
 
 # Installation
 
