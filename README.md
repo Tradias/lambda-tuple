@@ -12,7 +12,7 @@ The idea is to store all elements of the tuple in such a lambda:
 }
 ```
 
-I would consider it more of a toy implementation. Nonetheless, there is an extensive test suite including several tests from the Microsoft STL.
+I would consider it more of a toy implementation. Nonetheless, there is an extensive test suite including several tests from the Microsoft STL amounting to 75+ tests in total.
 
 Play with it on [godbolt](https://godbolt.org/z/KW43rbTG6).
 
@@ -24,19 +24,19 @@ Play with it on [godbolt](https://godbolt.org/z/KW43rbTG6).
 ![Lambda-tuple pretty-print](doc/pretty-print.png "pretty-printing")
 * An empty tuple is `std::is_trivial_v`.
 * Roughly 2.6 times faster to compile with GCC and 1.9 times faster with Clang. ([build-bench](https://build-bench.com/b/eT0y_KsZ342kkIbMw8tndVLquC8))
-* The compiler is allowed to re-order elements captured in the lambda to minimize its size (by ordering elements by their `sizeof` or performing empty-class optimization). In practice, however, none of the major compilers seem to make use of it. ([godbolt](https://godbolt.org/z/xqejPbczf))
 
 ## Disadvantages
 
 * Cannot be passed across DLL boundaries.
 * No in-place construction, just like `std::tuple`.
 * Triviallity of copy/move assignment of types is not preserved, just like `std::tuple`.
+* The compiler is allowed to re-order elements captured in the lambda to minimize its size (by ordering elements by their `sizeof` or performing empty-class optimization). In practice, however, none of the major compilers seem to make use of it. ([godbolt](https://godbolt.org/z/xqejPbczf))
 
 # Installation
 
 Copy the single header from [src/ltpl/tuple.hpp](src/ltpl/tuple.hpp) into your project.
 
-Alternatively use CMake to install the project. From the root of the repository:
+Alternatively, use CMake to install the project. From the root of the repository:
 
 ```cmake
 cmake -B build -S .

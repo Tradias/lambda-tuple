@@ -1,5 +1,5 @@
 # Copyright (c) 2022 Dennis Hezel
-# 
+#
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.14...3.24)
 
 project(
     lambda-tuple
-    VERSION 0.1.0
+    VERSION 1.0.0
     DESCRIPTION "An implementation of `std::tuple` based on variadic lambda capture"
     LANGUAGES CXX)
 
