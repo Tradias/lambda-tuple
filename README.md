@@ -1,7 +1,5 @@
 # lambda-tuple
 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Tradias_lambda-tuple&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Tradias_lambda-tuple)
-
 An implementation of `std::tuple` based on variadic lambda capture ([P0780R2](https://open-std.org/JTC1/SC22/WG21/docs/papers/2018/p0780r2.html)) added in C++20. 
 The idea is to store all elements of the tuple in such a lambda:
 

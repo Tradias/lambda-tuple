@@ -217,6 +217,8 @@ constexpr decltype(auto) get(ltpl::Tuple<T...>& tuple) noexcept
     }(std::make_index_sequence<I>{});
 }
 
+constexpr bool all_true(Access) noexcept { return true; }
+
 template <std::size_t N>
 constexpr bool all_true(bool const (&array)[N]) noexcept
 {

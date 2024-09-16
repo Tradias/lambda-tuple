@@ -10,7 +10,6 @@ on:
       - '**.cmake.in'
       - '**/CMakeLists.txt'
       - '.github/workflows/build.yml'
-      - 'sonar-project.properties'
       - 'CMakePresets.json'
 
 jobs:
@@ -57,21 +56,12 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Install gcovr
-      run: sudo apt-get install gcovr
-
     - uses: actions/checkout@v4
-      with:
-        # Disabling shallow clone is recommended for improving relevancy of sonarsource reporting
-        fetch-depth: 0
 
     - name: GCC 11 Configure CMake
       run: |
         cmake --preset default -DCMAKE_CXX_COMPILER=$(which g++-11) \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=on \
-        -DLAMBDA_TUPLE_TEST_COVERAGE=on \
-        -DLAMBDA_TUPLE_GCOV_PROGRAM=$(which gcov-11) \
-        -DLAMBDA_TUPLE_COVERAGE_OUTPUT_FILE=${{ github.workspace }}/build/sonarqube-coverage.xml \
         -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_DISABLE_PRECOMPILE_HEADERS=on
@@ -84,23 +74,6 @@ jobs:
 
     - name: GCC 11 Install
       run: cmake --install build --prefix build/out
-
-    - name: GCC 11 Coverage
-      run: cmake --build ${{ github.workspace }}/build --config Debug --target lambda-tuple-test-coverage
-
-    - name: Download sonar-scanner
-      uses: warchant/setup-sonar-scanner@v3
-      with:
-        version: 5.0.1.3006
-
-    - name: Run sonar-scanner
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        sonar-scanner \
-          -Dsonar.cfamily.compile-commands=${{ github.workspace }}/build/compile_commands.json \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-          -Dsonar.coverageReportPaths=${{ github.workspace }}/build/sonarqube-coverage.xml
 
 
   clang-build:
