@@ -53,6 +53,13 @@ concept WeaklyEqualityComparableWith =
         { u != t } -> ConvertibleTo<bool>;
     };
 
+// Not including <tuple> for std::tuple_size_v
+template <class T>
+inline constexpr std::size_t tuple_size_v = 1;
+
+template <class... T>
+inline constexpr std::size_t tuple_size_v<ltpl::Tuple<T...>> = sizeof...(T);
+
 // Test that the types list does not contain just one element that is decay-equal to T.
 template <class T, class, class...>
 inline constexpr bool is_not_exactly_v = true;
@@ -483,12 +490,12 @@ template <class... T>
 template <class... Tuples>
 [[nodiscard]] constexpr decltype(auto) tuple_cat(Tuples&&... tuples) noexcept
 {
-    constexpr auto total_size = (std::tuple_size_v<std::remove_cvref_t<Tuples>> + ...);
+    constexpr auto total_size = (detail::tuple_size_v<std::remove_cvref_t<Tuples>> + ...);
     constexpr auto indices = [&]
     {
         std::array<detail::TupleCatIndex, total_size> array{};
         size_t i{};
-        for (std::size_t outer{}; auto tuple_size : {std::tuple_size_v<std::remove_cvref_t<Tuples>>...})
+        for (std::size_t outer{}; auto tuple_size : {detail::tuple_size_v<std::remove_cvref_t<Tuples>>...})
         {
             for (size_t inner{}; inner != tuple_size; ++inner)
             {
