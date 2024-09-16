@@ -19,11 +19,11 @@ Play with it on [godbolt](https://godbolt.org/z/ajxavsrnM).
 ## Advantages
 
 * Triviallity of copy/move construction of types is preserved.
-* No template or function recursion used in the implementation. (except `std::conjunction` in requires and noexcept specifiers)
+* No template or function recursion used in the implementation.
 * Automatic pretty-printing in the debugger. E.g. for `tuple<int, double>`   
 ![Lambda-tuple pretty-print](doc/pretty-print.png "pretty-printing")
 * An empty tuple is `std::is_trivial_v`.
-* Roughly 2.6 times faster to compile with GCC and 1.9 times faster with Clang. ([build-bench](https://build-bench.com/b/eT0y_KsZ342kkIbMw8tndVLquC8))
+* Roughly 2.6 times faster to compile with GCC and 2 times faster with Clang. ([build-bench](https://build-bench.com/b/OOEJlYo9mQObmYHxBtS8G6-cmAc))
 
 ## Disadvantages
 

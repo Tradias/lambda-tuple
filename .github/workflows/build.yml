@@ -28,14 +28,14 @@ jobs:
             parallel: 2,
           }
           - {
-            name: 'MacOSX/11/AppleClang',
-            os: macos-11,
+            name: 'MacOSX/13/AppleClang',
+            os: macos-13,
             build-type: 'Debug',
-            parallel: 3,
+            parallel: 4,
           }
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Configure CMake
       run: cmake --preset default -DCMAKE_BUILD_TYPE=${{ matrix.config.build-type }}
@@ -48,50 +48,50 @@ jobs:
       run: build/test/${{ matrix.config.build-type }}/lambda-tuple-test.exe
 
     - name: Test
-      if: matrix.config.os == 'macos-11'
+      if: matrix.config.os == 'macos-13'
       run: build/test/lambda-tuple-test
 
 
   gcc-build:
-    name: 'Ubuntu/20.04/GCC'
-    runs-on: ubuntu-20.04
+    name: 'Ubuntu/22.04/GCC'
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Install gcovr
       run: sudo apt-get install gcovr
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         # Disabling shallow clone is recommended for improving relevancy of sonarsource reporting
         fetch-depth: 0
 
-    - name: GCC 10 Configure CMake
+    - name: GCC 11 Configure CMake
       run: |
-        cmake --preset default -DCMAKE_CXX_COMPILER=$(which g++-10) \
+        cmake --preset default -DCMAKE_CXX_COMPILER=$(which g++-11) \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=on \
         -DLAMBDA_TUPLE_TEST_COVERAGE=on \
-        -DLAMBDA_TUPLE_GCOV_PROGRAM=$(which gcov-10) \
+        -DLAMBDA_TUPLE_GCOV_PROGRAM=$(which gcov-11) \
         -DLAMBDA_TUPLE_COVERAGE_OUTPUT_FILE=${{ github.workspace }}/build/sonarqube-coverage.xml \
         -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_DISABLE_PRECOMPILE_HEADERS=on
 
-    - name: GCC 10 Build
+    - name: GCC 11 Build
       run: cmake --build --preset default --parallel $(nproc)
 
-    - name: GCC 10 Test
+    - name: GCC 11 Test
       run: build/test/lambda-tuple-test
 
-    - name: GCC 10 Install
+    - name: GCC 11 Install
       run: cmake --install build --prefix build/out
 
-    - name: GCC 10 Coverage
+    - name: GCC 11 Coverage
       run: cmake --build ${{ github.workspace }}/build --config Debug --target lambda-tuple-test-coverage
 
     - name: Download sonar-scanner
       uses: warchant/setup-sonar-scanner@v3
       with:
-        version: 4.7.0.2747
+        version: 5.0.1.3006
 
     - name: Run sonar-scanner
       env:
@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Clang 10 Configure CMake
       run: |
