@@ -6,6 +6,7 @@
 #ifndef LTPL_LTPL_TUPLE_HPP
 #define LTPL_LTPL_TUPLE_HPP
 
+#include <array>
 #include <cstddef>
 #include <type_traits>
 #include <utility>
@@ -17,6 +18,9 @@ class Tuple;
 
 namespace detail
 {
+template <class... T>
+struct TypeList;
+
 // A type that can be constructed from anything, useful for extracting the nth-element of a type list later.
 template <std::size_t>
 struct Anything
@@ -200,14 +204,23 @@ template <std::size_t... Ns>
 struct GetNth
 {
     template <class Nth>
-    constexpr Nth& operator()(Anything<Ns>..., Nth& nth, auto&...) noexcept
+    constexpr Nth&& operator()(Anything<Ns>..., Nth&& nth, auto&&...) noexcept
     {
-        return nth;
+        return static_cast<Nth&&>(nth);
     }
 };
 
 // An implementation of nth-element similar to the `Concept expansion` described by Kris Jusiak in his talk `The Nth
 // Element: A Case Study - CppNow 2022` but compatible with every C++20 compiler and easily backportable to C++14.
+template <std::size_t I, class... T>
+constexpr decltype(auto) get_nth(T&&... t) noexcept
+{
+    return [&]<std::size_t... Ns>(std::index_sequence<Ns...>) -> decltype(auto)
+    {
+        return GetNth<Ns...>{}(static_cast<T&&>(t)...);
+    }(std::make_index_sequence<I>{});
+}
+
 template <std::size_t I, class... T>
 constexpr decltype(auto) get(ltpl::Tuple<T...>& tuple) noexcept
 {
@@ -231,6 +244,12 @@ constexpr bool all_true(bool const (&array)[N]) noexcept
     }
     return true;
 }
+
+struct TupleCatIndex
+{
+    std::size_t outer;
+    std::size_t inner;
+};
 }  // namespace detail
 
 template <class... T>
@@ -459,6 +478,34 @@ template <class... T>
 [[nodiscard]] constexpr Tuple<T&&...> forward_as_tuple(T&&... v) noexcept
 {
     return Tuple<T&&...>(static_cast<T&&>(v)...);
+}
+
+template <class... Tuples>
+[[nodiscard]] constexpr decltype(auto) tuple_cat(Tuples&&... tuples) noexcept
+{
+    constexpr auto total_size = (std::tuple_size_v<std::remove_cvref_t<Tuples>> + ...);
+    constexpr auto indices = [&]
+    {
+        std::array<detail::TupleCatIndex, total_size> array{};
+        size_t i{};
+        for (std::size_t outer{}; auto tuple_size : {std::tuple_size_v<std::remove_cvref_t<Tuples>>...})
+        {
+            for (size_t inner{}; inner != tuple_size; ++inner)
+            {
+                array[i] = {outer, inner};
+                ++i;
+            }
+            ++outer;
+        }
+        return array;
+    }();
+    return [&]<std::size_t... I>(std::index_sequence<I...>)
+    {
+        using Ret =
+            Tuple<std::tuple_element_t<indices[I].inner, std::remove_cvref_t<decltype(detail::get_nth<indices[I].outer>(
+                                                             static_cast<Tuples&&>(tuples)...))>>...>;
+        return Ret{ltpl::get<indices[I].inner>(detail::get_nth<indices[I].outer>(static_cast<Tuples&&>(tuples)...))...};
+    }(std::make_index_sequence<total_size>{});
 }
 }  // namespace ltpl
 

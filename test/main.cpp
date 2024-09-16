@@ -5,6 +5,7 @@
 
 #include <test.hpp>
 #include <test/framework.hpp>
+#include <test_cat.hpp>
 #include <test_comparison.hpp>
 #include <test_constructor.hpp>
 #include <test_copy_assignment.hpp>
@@ -171,6 +172,9 @@ int main()
     run_test<&test_forward_as_tuple>();
     run_test<&test_tie>();
     run_test<&test_make_tuple>();
+
+    // test_cat
+    run_test<&test_tuple_cat>();
 
     print_test_results();
     return context.failed_tests;
